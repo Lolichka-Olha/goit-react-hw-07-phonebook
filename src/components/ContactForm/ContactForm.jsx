@@ -4,6 +4,7 @@ import {
   useAddContactsMutation,
 } from '../../redux/services';
 import { Form, Label, Input, Btn } from './ContactForm.styled';
+import { toast } from 'react-toastify';
 
 const ContactForm = () => {
   const [name, setName] = useState('');
@@ -37,7 +38,7 @@ const ContactForm = () => {
     );
 
     if (isInContacts) {
-      alert(`${name} is already in contacts.`);
+      toast.error(`${name} is already in contacts.`);
       reset();
       return;
     }
@@ -49,6 +50,7 @@ const ContactForm = () => {
 
     if (!isInContacts) {
       addContact(newContact);
+      toast.success('Contact is added');
       reset();
     }
   };
