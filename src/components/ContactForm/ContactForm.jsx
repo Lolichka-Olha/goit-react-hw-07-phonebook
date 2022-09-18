@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { addContact, getContacts } from '../../redux/contactsSlice';
-import { nanoid } from 'nanoid';
+import {
+  useGetContactsQuery,
+  useAddContactsMutation,
+} from '../../redux/services';
 import { Form, Label, Input, Btn } from './ContactForm.styled';
 
 const ContactForm = () => {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
-  const contacts = useSelector(getContacts);
-  const dispatch = useDispatch();
+
+  const { data: contacts } = useGetContactsQuery();
+  const [addContact, { isLoading }] = useAddContactsMutation();
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -41,13 +43,12 @@ const ContactForm = () => {
     }
 
     const newContact = {
-      id: nanoid(),
       name,
       number,
     };
 
     if (!isInContacts) {
-      dispatch(addContact(newContact));
+      addContact(newContact);
       reset();
     }
   };
@@ -84,7 +85,9 @@ const ContactForm = () => {
           required
         />
       </Label>
-      <Btn type="submit">Add contact</Btn>
+      <Btn type="submit" disabled={isLoading}>
+        Add contact
+      </Btn>
     </Form>
   );
 };

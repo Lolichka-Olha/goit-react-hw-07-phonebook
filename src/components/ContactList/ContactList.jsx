@@ -1,15 +1,20 @@
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { getFilter } from '../../redux/contactsSlice';
 import {
-  removeContact,
-  getContacts,
-  getFilter,
-} from '../../redux/contactsSlice';
+  useGetContactsQuery,
+  useDeleteContactsMutation,
+} from '../../redux/services';
 import { List, ListItem, Btn } from './ContactList.styled';
 
 const ContactList = () => {
-  const contacts = useSelector(getContacts);
+  const { data: contacts, isSuccess } = useGetContactsQuery();
+  const [deleteContact, { isLoading }] = useDeleteContactsMutation();
+
   const filter = useSelector(getFilter);
-  const dispatch = useDispatch();
+
+  if (!isSuccess) {
+    return;
+  }
 
   const getFilteredContacts = () => {
     const normalizedFilter = filter.toLowerCase();
@@ -19,22 +24,27 @@ const ContactList = () => {
     });
     return result;
   };
-
-  const deleteContact = id => {
-    dispatch(removeContact(id));
-  };
-  let renderContacts = filter === '' ? contacts : getFilteredContacts();
+  // const getFilteredContacts = () => {
+  //   return contacts.filter(contact =>
+  //     contact.name.toLowerCase().includes(filter.toLowerCase())
+  //   );
+  // };
 
   return (
     <List>
-      {renderContacts.map(({ id, name, number }) => (
-        <ListItem key={id} id={id} name={name} number={number}>
-          {name}: {number}
-          <Btn type="button" onClick={() => deleteContact(id)}>
-            Delete
-          </Btn>
-        </ListItem>
-      ))}
+      {contacts &&
+        getFilteredContacts().map(({ id, name, number }) => (
+          <ListItem key={id} id={id} name={name} number={number}>
+            {name}: {number}
+            <Btn
+              type="button"
+              onClick={() => deleteContact(id)}
+              disabled={isLoading}
+            >
+              Delete
+            </Btn>
+          </ListItem>
+        ))}
     </List>
   );
 };
